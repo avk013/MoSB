@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="Y:\lazarus\fpc\3.0.4\bin\x86_64-win64\fpc.exe" Date="1351329191"/>
+  <Params Value=" -MObjFPC -Scghi -O1 -g -gl -WG -l -vewnhibq -FiY:\repositiries\MoSB\MoSB_a1\lib\x86_64-win64 -FuY:\lazarus\lcl\units\x86_64-win64\win32 -FuY:\lazarus\lcl\units\x86_64-win64 -FuY:\lazarus\components\lazutils\lib\x86_64-win64 -FuY:\lazarus\packager\units\x86_64-win64 -FuY:\repositiries\MoSB\MoSB_a1\ -FUY:\repositiries\MoSB\MoSB_a1\lib\x86_64-win64\ -FEY:\repositiries\MoSB\MoSB_a1\ -oY:\repositiries\MoSB\MoSB_a1\unp1.exe -dLCL -dLCLwin32 unp1.lpr"/>
+</CONFIG>
