@@ -3,7 +3,7 @@ object Form1: TForm1
   Height = 240
   Top = 369
   Width = 495
-  Caption = 'получаем данные с архива'
+  Caption = 'обработка данных архива с shipbox (C)PJSC"UDP"'
   ClientHeight = 240
   ClientWidth = 495
   OnCreate = FormCreate
@@ -12,8 +12,8 @@ object Form1: TForm1
     Left = 7
     Height = 53
     Top = 144
-    Width = 379
-    Caption = '2.выбираем местоположнение файлов'
+    Width = 445
+    Caption = '2. Распаковываем и объединяем отчеты в общие файлы'
     OnClick = step2Click
     TabOrder = 0
   end
@@ -29,13 +29,13 @@ object Form1: TForm1
     Left = 7
     Height = 54
     Top = 68
-    Width = 379
-    Caption = '1. Указываем папку с  архивом и получаем отосланные данные'
+    Width = 443
+    Caption = '1. Указываем папку с  архивом и получаем отосланные данные *.rar'
     OnClick = step1Click
     TabOrder = 1
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
-    left = 248
+    left = 312
     top = 8
   end
 end

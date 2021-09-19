@@ -35,8 +35,16 @@ implementation
 { TForm1 }
 procedure TForm1.FormCreate(Sender: TObject);
 begin // впоследствии возьмем из настроек
-path_temp:='l:\temp_ship';
-path_unrar:='Y:\!monitoring\unpacker1\7z.exe x ';
+//path_temp:='l:\temp_ship'; Каталог для работы
+path_temp:=GetEnvironmentVariable('TEMP');
+//GetCurrentDir
+//path_unrar:='Y:\!monitoring\unpacker1\7z.exe x ';
+path_unrar:=GetCurrentDir+'\7z.exe x ';
+if not FileExists(GetCurrentDir+'\7z.exe') then
+begin
+step1.Enabled:=false; step2.Enabled:=false;
+ShowMessage('В папке с программой "'+GetCurrentDir +'" должен размещаться файл 7z.exe!!!');
+end;
 end;
 
 procedure TForm1.step1Click(Sender: TObject);
@@ -74,12 +82,15 @@ end;
 
 procedure TForm1.step2Click(Sender: TObject);
 var arh2, file_s:TStringList;
-  i2, i3 , i4:integer;
+  i, i2, i3 , i4:integer;
   path_temp2, path_temp3, path_temp4, path_out:string;
-  temi2:string;
+  tfOut,tfIn:textfile;
+ // temi2:string;
   file_exct:string;
-  str_name_file:string;
+  str_name_file, body_file:string;
+//  cmd,fil,dir:string;
  arr_name_file:TStringArray;
+ F: TfileStream;
 begin
 str_name_file:='acc.data,adam.data,boiler.data,gps.data,gpsriver.data,t.data';
 arr_name_file:=str_name_file.Split(',');//получаем массив нужных файлов
@@ -87,17 +98,28 @@ path_temp2:=path_temp+'\shipBox\sent';
 path_temp3:=path_temp+'\all';
 path_temp4:=path_temp+'\all\shipBox\temp';
 path_out:=path_temp+'\out\';
-temi2:='';
-CreateDir(path_temp);
+//temi2:='';
+CreateDir(path_temp2);
 CreateDir(path_temp3);
 CreateDir(path_out);//узнаем все имена отосланных данных
+//создаем пустые файлы для результатов
+for i:=0 to Length(arr_name_file)-1
+do if not FileExists(path_out+arr_name_file[i]) then
+begin //Нет файла с таким названием! Создаем!!!!
+F:= TFileStream.Create(path_out+arr_name_file[i],fmCreate);
+F.Free;
+end;Sleep(225);
+//
 arh2:=FindAllFiles(path_temp2,'*.rar',false);
 for i2:=0 to arh2.Count-1 // перебираем все архивы
 do begin //ShowMessage(arh2[i2]);
 //распаковsваем каждый и объединяем
 file_exct:=path_unrar+arh2[i2]+' -o"'+path_temp3+'" -y';
-// !!! Очень плохо нужно использовать другое
+// !!! Очень плохо нужно использовать другое  НО нормально работает только так
 ExecuteProcess(file_exct, '');
+//
+//if ShellExecute(0,nil, PChar(file_exct),PChar(''),nil,1)=0 then;
+Sleep(225);
 //а теперь смотрим что у нас там....
 file_s:=FindAllFiles(path_temp4,'*',false);
 //получили список распакованных файлов
@@ -109,11 +131,33 @@ do // arr_name_file список того что нужно брать
 begin //если находим искомый файл - объединаем его в общий
 if (file_s[i3].IndexOf(arr_name_file[i4])>=0) then
 begin //copy 1.data+2.data /b 1.data
-file_exct:='cmd.exe /K ';
+//file_exct:='cmd.exe /K ';
 //ExecuteProcess(file_exct, 'copy '+path_out+arr_name_file[i4]+'+'+file_s[i3]+' /b '+path_out+arr_name_file[i4]);
-//if ShellExecute(0,nil, PChar('cmd'),PChar('/k copy'+path_out+arr_name_file[i4]+'+'+file_s[i3]+' /b '+path_out+arr_name_file[i4]),nil,1) =0 then;
-if ShellExecute(0,nil, PChar('cmd'),PChar('/c copy '+path_out+arr_name_file[i4]+'+'+file_s[i3]+' /b '+path_out+arr_name_file[i4]),nil,0)=0 then;
-Sleep(125);// Вынужденно, что-то работает не так
+//if ShellExecute(0,nil, PChar('cmd'),PChar(' /k copy '+path_out+arr_name_file[i4]+'+'+file_s[i3]+' /b '+path_out+arr_name_file[i4]),nil,1) =0 then;
+//Sleep(100);// Вынужденно, что-то работает не так
+//if ShellExecute(0,nil, PChar('cmd'),PChar(' /c copy '+path_out+arr_name_file[i4]+'+'+file_s[i3]+' /b '+path_out+arr_name_file[i4]),nil,0)=0 then;
+//ShowMessage(path_out+arr_name_file[i4]+'+'+file_s[i3]+' /b '+path_out+arr_name_file[i4]);
+//переписіваем добавление
+AssignFile(tfIn, file_s[i3]);
+reset(tfIn);
+AssignFile(tfOut, path_out+arr_name_file[i4]);
+ try
+   // Open for append, write and close.
+   append(tfOut);
+//   writeln(tfOut, 'New data for text file');
+//   writeln(tfOut, 'New informtion should be at the end of the file.');
+while not eof(tfIn) do begin
+readln(tfIn,body_file);
+writeln(tfOut,body_file);
+end;
+   CloseFile(tfIn);
+   CloseFile(tfOut);
+ except
+   on E: EInOutError do
+    writeln('File error. Elaboration: ', E.Message);
+ end;
+
+
 //ExecuteProcess(file_exct, 'dir');
 break; // выходим из for так как нашли то что надо
 end
@@ -121,7 +165,7 @@ end
 end;
 end;
 DeleteDirectory(path_temp3, True);
-temi2:=temi2+arh2[i2];
+//temi2:=temi2+arh2[i2];
 end; // переходим к следующему архиву
 //ShowMessage(arh2[i2]);
 //temi2:=temi2+arh2[i2];
@@ -130,7 +174,11 @@ end; // переходим к следующему архиву
 //распаковіваем по отдельности и добавляем в "общ файл"
 //end;
 arh2.Free;
-  ShowMessage(temi2)
+//cmd := PChar('open');fil := PChar('explorer.exe');dir := PChar(' ');
+//if ShellExecute(Self.Handle, cmd, fil, PChar(path_out), nil, 1)=0 then;
+//if ShellExecute(0,nil, PChar('cmd'),PChar('/c copy '+path_out+arr_name_file[i4]+'+'+file_s[i3]+' /b '+path_out+arr_name_file[i4]),nil,0)=0 then;
+ShellExecute(handle,'explore',PChar(path_out),nil,nil,1);
+//  ShowMessage(temi2)
   end;
 
 end.
